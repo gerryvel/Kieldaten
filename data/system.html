@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<HEAD>
+    <TITLE>Systeminfo</TITLE>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta http-equiv="refresh" content="5">
+</HEAD>
+<BODY>
+    <br />
+    <p class="label">Eigene IP-Adresse - AP: %sAP_IP%
+        <br />
+        Clients am AP: %sAP_Clients%</p>
+        <br />
+    <p class="label">I2C Sensor: %sI2C_Adress%<br />%sI2C_Status%</p>
+        <br />
+    <p class="label">Sensorlage: %sOrient%</p>
+        <br />    
+    <p class="label">Informationen zum ESP32 - Board:<br />%sBoardInfo%</p>
+    <p class="label">LittleFS, benutzte Bytes: %sFS_USpace% <br />
+                    LittleFS, gesamte Bytes: %sFS_TSpace% </p>
+        <br />    
+    <ul class="bottomnav">
+        <li><a href="/">Home</a></li>
+        <li><a href="settings.html">Setting</a></li>
+        <li><a class="active" href="system.html">System</a></li>
+        <li><a href="firmware.html">Firmware</a></li>
+        <li class="right"><a href="ueber.html">About</a></li>
+    </ul>
+</BODY>
+</HTML>
