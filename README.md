@@ -2,11 +2,11 @@
 
 The ESP32 in this project is an Adafruit Huzzah! ESP32. This is a small module without USB connector.
 
-With the ESP32 and Sensors for  distance (xxx) it's possible
+With the ESP32 and Sensors for  distance (Digilant PmodToF) it's possible
 monitoring the varaible keel (Kiel). 
 All data is available in the web interface. 
 
-The 12 Volt is reduced to 5 Volt with a DC Step-Down_Converter. 12V DC comes from the N2k Bus Connector with the M12 Connector.
+The 12 Volt is reduced to 5 Volt with a DC Step-Down_Converter. 12V DC comes from the N2k Bus Connector with the M12 Connector for future Data to NMEA2000).
 
 The Website use LittleFS Filesystem. You must use Partition Schemes "Minimal SPIFFS with APPS and OTA".
 The HTML Data upload separately with 
@@ -15,8 +15,6 @@ The HTML Data upload separately with
 from /data directory.
 
 # Physik:
-
-![strauch_02_03_035](https://github.com/gerryvel/Bootsdaten/assets/17195231/089ffe03-a30e-45d0-bf36-3a9d06e02bc7)
 
 
 # Partlist:
@@ -34,9 +32,6 @@ from /data directory.
 
 # PCB and Housing assembly
 
-
-
-PCB by Aisler [Link](https://aisler.net/p/NZFHAMAJ)
 
 # Webinterface
 
