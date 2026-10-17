@@ -1,4 +1,13 @@
-#KD Sensor Modul
+## KD Sensor Modul
+
+![ESP32](https://img.shields.io/badge/ESP32-grey?logo=Espressif)
+![KiCad](https://img.shields.io/badge/KiCad-darkblue?logo=KiCad)
+![Relaise](https://img.shields.io/github/release-date/gerryvel/Kieldaten?)
+![lastcommit](https://img.shields.io/github/last-commit/gerryvel/Kieldaten)
+[![OBP](https://img.shields.io/badge/Sailing_with-OpenBoatsProjects-blue)](https://open-boat-projects.org/de/)
+
+
+## Description
 
 The ESP32 in this project is an Adafruit Huzzah! ESP32. This is a small module without USB connector.
 
