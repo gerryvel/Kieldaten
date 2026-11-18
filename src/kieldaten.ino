@@ -255,9 +255,9 @@ void loop()
   //bAP_on = WiFi.enableAP(bAP_on);
     
   // LED visu Wifi
-  flashLED(LED(Green)); // Betrieb ok
+  flashLED(LED(Green), 5); // Betrieb ok
   if (bI2C_Status == 0){
-    flashLED(LED(Red)); // Sensorfehler
+    flashLED(LED(Red),5); // Sensorfehler
     Serial.print("Sensorfehler\n");
   } 
 
@@ -272,14 +272,14 @@ void loop()
 
   if (bToF_Status) {
     if (PmodToF::readDistanceMeters(fSStellung))
-    {fSStellung = fSStellung + 100.0; 
-    Serial.printf("Kiel ausgefahren: %.3f m\n", fSStellung);
+    {Serial.printf("Pmod ToF I2C read successful\n"), flashLED(LED(Blue),5);
     } else {
-      Serial.println("Pmod ToF I2C read failed");
+      Serial.println("Pmod ToF I2C read failed\n");
     }
   }
-
+  fSStellung = fSStellung * 100.0;
   fAbsTief = fSStellung + fKielOffset;
+  Serial.printf("Kiel ausgefahren: %f cm\n", fSStellung);  // Kiel ausgefahren: %.3f m\n", fSStellung
   Serial.printf("Tiefgang: %f cm\n", fAbsTief);
 
   // Send Messages NMEA 0183

@@ -23,7 +23,7 @@ int i = 0;
 
 //Configuration Web Page 
 #define PAGE_REFRESH 10 // x Sec.
-#define WEB_TITEL "Bootsdaten"
+#define WEB_TITEL "Kieldaten"
 
 //Configuration mit Webinterface
 struct Web_Config
@@ -89,6 +89,7 @@ unsigned int counter = 0;
 
 const int iMaxSonar = 35;			//Analoginput 
 int iDistance = 0;
+
 float fSStellung = 0.0f;			// länge des ausgefahrenen Kiels
 float fAbsTief = 0;					// Absoluter Tiefgang	
 float fKielOffset = 0;				// Offset des Kiels, Wasserlinie bis Kielboden
