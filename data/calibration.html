@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <title>Kalibrierung</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        body { padding-bottom: 80px; }
+        @media screen and (max-width: 600px) {
+            body { padding-bottom: 0; }
+            ul.bottomnav { position: static; }
+        }
+    </style>
+</head>
+<body>
+    <h2>Pmod ToF kalibrieren</h2>
+    <p class="label" id="measurement">Messwert wird geladen...</p>
+    <p class="label" id="instructions">Status wird geladen...</p>
+    <p id="error" role="alert"></p>
+    <div id="distance-input" hidden>
+        <label for="distance">Referenzabstand in cm:</label>
+        <input id="distance" type="number" min="5.01" max="3331" step="any" value="15">
+    </div>
+    <p><button class="button" id="next" hidden></button></p>
+    <p><button class="button" id="cancel" hidden>Kalibrierung abbrechen</button></p>
+    <p>W&auml;hrend der Kalibrierung werden keine Kielwerte gesendet.</p>
+    <p>Den Referenzabstand innerhalb des tats&auml;chlichen Messbereichs des Sensors w&auml;hlen.</p>
+   
+    <script>
+        var currentState = "";
+        var sending = false;
+        var instructions = {
+            idle: "Starten Sie die Kalibrierung. Zuerst wird die Signalst\u00e4rke automatisch kalibriert.",
+            busy: "Kalibrierung l\u00e4uft. Bitte warten und den Aufbau nicht ver\u00e4ndern.",
+            cover: "Photodiode vollst\u00e4ndig gegen Licht abschirmen, dann \u00dcbersprechen kalibrieren.",
+            distance: "Abschirmung entfernen. Sensor vor einem Ziel mit bekanntem Abstand aufstellen und Abstand eingeben.",
+            complete: "Kalibrierung abgeschlossen und im Sensor-EEPROM gespeichert.",
+            error: "Kalibrierung fehlgeschlagen. Sensor und EEPROM pr\u00fcfen und das Ger\u00e4t neu starten. Die vorherige Kalibrierung wurde nach M\u00f6glichkeit wiederhergestellt."
+        };
+        var actions = {idle: "start", cover: "crosstalk", distance: "distance", complete: "start"};
+        var labels = {idle: "Kalibrierung starten", cover: "\u00dcbersprechen kalibrieren", distance: "Abstand kalibrieren und speichern", complete: "Erneut kalibrieren"};
+        function update() {
+            fetch("/calibration/status", {cache: "no-store"}).then(function(response) {
+                if (!response.ok) throw new Error("Status konnte nicht gelesen werden.");
+                return response.json();
+            }).then(function(data) {
+                currentState = data.state;
+                document.getElementById("measurement").textContent =
+                    (data.state === "idle" || data.state === "complete") && data.sensor
+                        ? "Aktuelle Messung: " + data.measurement + " cm"
+                        : "Messwert w\u00e4hrend der Kalibrierung nicht verf\u00fcgbar.";
+                document.getElementById("instructions").textContent = data.sensor
+                    ? (instructions[data.state] || "Unbekannter Status.")
+                    : "Sensor nicht verf\u00fcgbar. Anschluss pr\u00fcfen und neu starten.";
+                var button = document.getElementById("next");
+                button.hidden = !data.sensor || !actions[data.state];
+                button.disabled = sending;
+                button.textContent = labels[data.state] || "";
+                document.getElementById("cancel").hidden = !data.sensor || (data.state !== "cover" && data.state !== "distance");
+                document.getElementById("cancel").disabled = sending;
+                document.getElementById("distance-input").hidden = data.state !== "distance";
+            }).catch(function(error) {
+                document.getElementById("error").textContent = error.message;
+            });
+        }
+        function send(action) {
+            if (sending) return;
+            var body = new URLSearchParams();
+            body.set("action", action);
+            if (action === "distance") {
+                var input = document.getElementById("distance");
+                if (!input.checkValidity() || Number(input.value) <= 5) {
+                    document.getElementById("error").textContent = "Abstand gr\u00f6\u00dfer als 5 und h\u00f6chstens 3331 cm eingeben.";
+                    return;
+                }
+                body.set("distance", input.value);
+            }
+            sending = true;
+            document.getElementById("error").textContent = "";
+            fetch("/calibration", {method: "POST", body: body}).then(function(response) {
+                if (!response.ok) return response.text().then(function(text) { throw new Error(text); });
+            }).catch(function(error) {
+                document.getElementById("error").textContent = error.message;
+            }).then(function() {
+                sending = false;
+                update();
+            });
+        }
+        document.getElementById("next").onclick = function() { send(actions[currentState]); };
+        document.getElementById("cancel").onclick = function() { send("cancel"); };
+        update();
+        setInterval(update, 1000);
+    </script>
+     <ul class="bottomnav">
+        <li><a href="/">Home</a></li>
+        <li><a href="settings.html">Einstellungen</a></li>
+        <li><a class="active" href="calibration.html">Kalibrierung</a></li>
+        <li><a href="system.html">System</a></li>
+        <li><a href="firmware.html">Firmware</a></li>
+        <li class="right"><a href="ueber.html">About</a></li>
+    </ul>
+</body>
+</html>

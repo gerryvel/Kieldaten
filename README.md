@@ -16,6 +16,20 @@ soft-start command, so no SS or IRQ GPIO connection is needed. It reports the
 distance in meters over Serial. User calibration is loaded from the module EEPROM,
 with factory calibration used as a fallback.
 
+Open **Calibration** in the web interface to calibrate the Pmod ToF. Start
+the automatic magnitude calibration, completely shield the photodiode from
+light for crosstalk calibration, then remove the shield and position a target
+at a known distance. Enter the distance in centimetres (greater than 5 cm,
+at most 3331 cm). The result is verified and saved in the module's user
+EEPROM; its factory calibration is not overwritten. Aborting before saving
+restores the previous sensor registers. After an error, restart the device
+and check the sensor and EEPROM; a failed EEPROM write may leave the user
+calibration invalid, in which case startup falls back to factory calibration.
+Keel values are not transmitted during calibration or after a calibration
+error. The existing Kieloffset setting is separate from sensor calibration.
+Choose a reference distance within the sensor's actual usable range; the
+3331 cm software limit is not a guarantee of measurement range.
+
 The 12 Volt is reduced to 5 Volt with a DC Step-Down_Converter. 12V DC comes from the N2k Bus Connector with the M12 Connector.
 
 The Website use LittleFS Filesystem. You must use Partition Schemes "Minimal SPIFFS with APPS and OTA".

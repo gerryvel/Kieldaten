@@ -7,6 +7,9 @@
 #include <LittleFS.h>
 #include "helper.h"
 #include "async_server.h"
+#include "Calibration.h"
+
+extern bool bToF_Status;
 
 // Set web server port number to 80
 AsyncWebServer server(80);
@@ -132,6 +135,50 @@ void website(){
 	server.on("/settings.html", HTTP_GET, [](AsyncWebServerRequest* request) {
 			request->send(LittleFS, "/settings.html", String(), false, replaceVariable);
 		});
+	server.on("/calibration.html", HTTP_GET, [](AsyncWebServerRequest* request) {
+			request->send(LittleFS, "/calibration.html", String(), false, replaceVariable);
+		});
+	server.on("/calibration/status", HTTP_GET, [](AsyncWebServerRequest* request) {
+		String json = "{\"state\":\"";
+		json += Calibration::stateName(Calibration::getState());
+		json += "\",\"sensor\":";
+		json += bToF_Status ? "true" : "false";
+		json += ",\"measurement\":";
+		json += String(fSStellung, 1);
+		json += "}";
+		request->send(200, "application/json", json);
+	});
+	server.on("/calibration", HTTP_POST, [](AsyncWebServerRequest* request) {
+		if (!request->hasParam("action", true)) {
+			request->send(400, "text/plain", "Aktion fehlt");
+			return;
+		}
+		const String actionName = request->getParam("action", true)->value();
+		Calibration::Action action = Calibration::Action::None;
+		double distance = 0;
+		if (actionName == "start") action = Calibration::Action::Start;
+		else if (actionName == "crosstalk") action = Calibration::Action::Crosstalk;
+		else if (actionName == "cancel") action = Calibration::Action::Cancel;
+		else if (actionName == "distance" && request->hasParam("distance", true)) {
+			const String input = request->getParam("distance", true)->value();
+			char *end = nullptr;
+			distance = strtod(input.c_str(), &end);
+			if (end == input.c_str() || *end != '\0' || !isfinite(distance) ||
+			    distance <= 5.0 || distance > 3331.0) {
+				request->send(400, "text/plain", "Referenzabstand muss groesser als 5 und hoechstens 3331 cm sein");
+				return;
+			}
+			distance /= 100.0;
+			action = Calibration::Action::Distance;
+		}
+		if (action == Calibration::Action::None) {
+			request->send(400, "text/plain", "Ungueltige Aktion");
+		} else if (!Calibration::submit(action, distance, bToF_Status)) {
+			request->send(409, "text/plain", "Sensor nicht verfuegbar oder Aktion derzeit nicht moeglich");
+		} else {
+			request->send(202, "text/plain", "Kalibrierschritt gestartet");
+		}
+	});
 	server.on("/ueber.html", HTTP_GET, [](AsyncWebServerRequest* request) {
 			request->send(LittleFS, "/ueber.html", String(), false, replaceVariable);
 		});

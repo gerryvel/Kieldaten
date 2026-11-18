@@ -270,20 +270,23 @@ void loop()
   sCL_Status = sWifiStatus(WiFi.status());
 
 
-  if (bToF_Status) {
-    if (PmodToF::readDistanceMeters(fSStellung))
-    {Serial.printf("Pmod ToF I2C read successful\n"), flashLED(LED(Blue),5);
+  Calibration::process();
+  if (bToF_Status && Calibration::measurementAllowed()) {
+    float distanceMeters;
+    if (PmodToF::readDistanceMeters(distanceMeters)) {
+      fSStellung = distanceMeters * 100.0f;
+      Serial.println("Pmod ToF I2C read successful");
+      flashLED(LED(Blue), 5);
     } else {
       Serial.println("Pmod ToF I2C read failed\n");
     }
-  }
-  fSStellung = fSStellung * 100.0;
-  fAbsTief = fSStellung + fKielOffset;
-  Serial.printf("Kiel ausgefahren: %f cm\n", fSStellung);  // Kiel ausgefahren: %.3f m\n", fSStellung
-  Serial.printf("Tiefgang: %f cm\n", fAbsTief);
+    fAbsTief = fSStellung + fKielOffset;
+    Serial.printf("Kiel ausgefahren: %f cm\n", fSStellung);
+    Serial.printf("Tiefgang: %f cm\n", fAbsTief);
 
-  // Send Messages NMEA 0183
-  SendNMEA0183Message(sendXDRKiel()); // Send NMEA0183 Message for Kiel
+    // Send Messages NMEA 0183
+    SendNMEA0183Message(sendXDRKiel()); // Send NMEA0183 Message for Kiel
+  }
 
   delay(200);
 
