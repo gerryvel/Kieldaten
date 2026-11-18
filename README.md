@@ -1,21 +1,22 @@
-## KD Sensor Modul
-
-![ESP32](https://img.shields.io/badge/ESP32-grey?logo=Espressif)
-![KiCad](https://img.shields.io/badge/KiCad-darkblue?logo=KiCad)
-![Relaise](https://img.shields.io/github/release-date/gerryvel/Kieldaten?)
-![lastcommit](https://img.shields.io/github/last-commit/gerryvel/Kieldaten)
-[![OBP](https://img.shields.io/badge/Sailing_with-OpenBoatsProjects-blue)](https://open-boat-projects.org/de/)
-
-
-## Description
+#BD Kiel Modul
 
 The ESP32 in this project is an Adafruit Huzzah! ESP32. This is a small module without USB connector.
 
-With the ESP32 and Sensors for  distance (Digilant PmodToF) it's possible
+With the ESP32 and 1 Sensors distance (ToF) it's possible
 monitoring the varaible keel (Kiel). 
 All data is available in the web interface. 
+Kiel-data are available as NMEA0183 UDP-Stream over Wlan.
+NMEA2000 are Linear Actor available with PGN 128780.
 
-The 12 Volt is reduced to 5 Volt with a DC Step-Down_Converter. 12V DC comes from the N2k Bus Connector with the M12 Connector for future Data to NMEA2000).
+## Pmod ToF
+
+The optional Digilent Pmod ToF is read from the ISL29501 at I2C address `0x57`.
+The firmware starts each single-shot measurement with the ISL29501's I2C
+soft-start command, so no SS or IRQ GPIO connection is needed. It reports the
+distance in meters over Serial. User calibration is loaded from the module EEPROM,
+with factory calibration used as a fallback.
+
+The 12 Volt is reduced to 5 Volt with a DC Step-Down_Converter. 12V DC comes from the N2k Bus Connector with the M12 Connector.
 
 The Website use LittleFS Filesystem. You must use Partition Schemes "Minimal SPIFFS with APPS and OTA".
 The HTML Data upload separately with 
@@ -42,9 +43,19 @@ from /data directory.
 # PCB and Housing assembly
 
 
+
+PCB by Aisler [Link](https://aisler.net/p/NZFHAMAJ)
+
 # Webinterface
 
 
+
+# Plotter
+
+
+
+
 # Versions
+
 
 - 1.0 working Version

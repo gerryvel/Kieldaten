@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 // Versionierung
-#define VersionSoftware "1.0.0.0 (2026-10-10)"  // Version Software
+#define VersionSoftware "1.0.0.0 (2026-11-18)"  // Version Software
 #define VersionHardware "2.5.0.0 (2025-11-30)"  // Version Hardware
 
 // Configuration N2k
@@ -42,7 +42,7 @@ const bool  hide_SSID      = false;             // To disable SSID broadcast -> 
 const int   max_connection = 4;                 // Maximum simultaneous connected clients on the AP
 
 // Variables for WIFI-AP
-IPAddress IP = IPAddress(192, 168, 15, 20);
+IPAddress IP = IPAddress(192, 168, 15, 35);
 IPAddress Gateway = IPAddress(192, 168, 15, 1);
 IPAddress NMask = IPAddress(255, 255, 255, 0);
 IPAddress AP_IP;
@@ -87,11 +87,11 @@ long timer = 0;   //general purpuse timer
 long timer_old;
 unsigned int counter = 0;
 
-// Distanzmesung
-float fdistanceMeters = 0;
-float fSStellung = 0;
-float fAbsTief = 0;
-float fKielOffset = 0;
+const int iMaxSonar = 35;			//Analoginput 
+int iDistance = 0;
+float fSStellung = 0.0f;			// länge des ausgefahrenen Kiels
+float fAbsTief = 0;					// Absoluter Tiefgang	
+float fKielOffset = 0;				// Offset des Kiels, Wasserlinie bis Kielboden
 
 
 //Definiton NMEA0183 MWV

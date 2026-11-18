@@ -35,7 +35,7 @@ Transducer Values
 */
 
 // Send Kraengung data
-String sendXDR()
+String sendXDRKraeng()
 {   
   String HexCheckSum;
   String NMEASensorKraeng;
@@ -57,5 +57,30 @@ String sendXDR()
   Serial.println(SendSensorKraeng);
   
   return SendSensorKraeng;
+}
+
+// Send Kiel data
+String sendXDRKiel()
+{   
+  String HexCheckSum;
+  String NMEASensorKiel;
+  String SendSensorKiel;
+  
+  // Create NMEA string for XDR sensor Kiel $IIXDR,A,0,x.x,DEPTH*hh<CR><LF>
+  
+    NMEASensorKiel = "IIXDR,A,";  //NMEASensorKiel = "IIXDR,A," + String(SensorID);  
+    //NMEASensorKiel += ",";
+    NMEASensorKiel += String(fSStellung);
+    NMEASensorKiel += ",D,DEPTH";
+    // Build CheckSum
+    HexCheckSum = String(CheckSum(NMEASensorKiel), HEX);
+    // Build complete NMEA string
+  SendSensorKiel = "$" + NMEASensorKiel;
+  SendSensorKiel += "*";
+  SendSensorKiel += HexCheckSum;
+
+  Serial.println(SendSensorKiel);
+  
+  return SendSensorKiel;
 }
 
