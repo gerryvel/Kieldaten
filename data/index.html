@@ -15,20 +15,20 @@
     <canvas data-type="radial-gauge"
             data-width="300"
             data-height="300"
-            data-units="Grad"
+            data-units="cm"
             data-title="Kiel"
-            data-min-value="-50"
-            data-start-angle="90"
+            data-min-value="0"
+            data-start-angle="180"
             data-ticks-angle="180"
             data-value-box="true"
-            data-max-value="50"
-            data-major-ticks="-50,-40,-30,-20,-10,0,10,20,30,40,50"
+            data-max-value="150"
+            data-major-ticks="0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150"
             data-minor-ticks="2"
             data-stroke-ticks="true"
             data-highlights='[
         {"from": 0, "to": 30, "color": "rgba(255, 50, 50, .75)"},
-        {"from": 30, "to": 50, "color": "rgba(0, 255, 0, .75)"},
-        {"from": 50, "to": 120, "color": "rgba(255, 50, 50, .75)"}
+        {"from": 30, "to": 50, "color": "rgba(255, 155, 50, .75)"},
+        {"from": 50, "to": 150, "color": "rgba(0, 255, 0, .75)"}
     ]'
             data-color-plate="#fff"
             data-border-shadow-width="0"
@@ -40,8 +40,39 @@
             data-needle-circle-inner="false"
             data-animation-duration="1500"
             data-animation-rule="linear"
-            data-value-text='%sKraengung%&deg; %sSTBB%'
-            data-value='%sGaugeKraengung%'>
+            data-value-text='%sSStellung% cm'
+            data-value='%sSStellung%'>
+        </canvas>
+         <canvas data-type="radial-gauge"
+            data-width="300"
+            data-height="300"
+            data-units="cm"
+            data-title="Tiefgang"
+            data-min-value="0"
+            data-start-angle="180"
+            data-ticks-angle="180"
+            data-value-box="true"
+            data-max-value="200"
+            data-major-ticks="0,20,40,60,80,100,120,140,160,180,200"
+            data-minor-ticks="2"
+            data-stroke-ticks="true"
+            data-highlights='[
+        {"from": 0, "to": 30, "color": "rgba(255, 50, 50, .75)"},
+        {"from": 30, "to": 100, "color": "rgba(255, 155, 50, .75)"},
+        {"from": 100, "to": 200, "color": "rgba(0, 255, 0, .75)"}
+    ]'
+            data-color-plate="#fff"
+            data-border-shadow-width="0"
+            data-borders="false"
+            data-needle-type="arrow"
+            data-needle-width="2"
+            data-needle-circle-size="7"
+            data-needle-circle-outer="true"
+            data-needle-circle-inner="false"
+            data-animation-duration="1500"
+            data-animation-rule="linear"
+            data-value-text='%sAbsTief% cm'
+            data-value='%sAbsTief%'>
         </canvas>
         <br />
     <ul class="bottomnav">
