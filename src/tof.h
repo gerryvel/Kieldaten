@@ -210,7 +210,7 @@ void ToF_calibrate(void)
   Serial.println("Starting distance calibration...  You have 10 sec to prepare the device"); //display a message
   Serial.println("Mount the Pmod to a known distance from the target");                      //display a message
   delay(10000);                                                                              //wait 10s
-  ToF_calibrate_distance(CALIBRATION_DISTANCE);                                              //perform distance calibration
+  ToF_calibrate_distance(CALIBRATION_DISTANCE, 100);                                              //perform distance calibration
 
   //save calibration values in EEPROM
   Serial.println("Saving calibration data"); //display a message
