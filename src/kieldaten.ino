@@ -1,7 +1,7 @@
 /*
-    Name:       bootsdaten.ino
-    Created:	10.10.2026
-    Update: 	V1.0 vom 19.10.2026
+    Name:       Kieldaten.ino
+    Created:	18.11.2026
+    Update: 	V1.0.0 vom 19.11.2026
     Author:     Gerry Sebb
 */
 
@@ -19,15 +19,19 @@
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
 #include <Wire.h>
+#include "PmodToF.h"
 #include <NMEA2000_CAN.h>
 #include <NMEA2000.h>
 #include <N2kMessages.h>
 #include "NMEA0183Telegram.h"
-#include "tof.h"
-
 
 // NMEA2000
 Preferences preferences;             // Nonvolatile storage on ESP32 - To store LastDeviceAddress
+
+// TOF Sensor Status
+bool bToF_Status = false;
+bool bToF_CalibrationLoaded = false;
+
 
 //NMEA 0183 Stream
 WiFiUDP udp;  // Create UDP instance
@@ -54,14 +58,43 @@ void SetNextUpdate(unsigned long &NextUpdate, unsigned long Period) {
   while ( NextUpdate < millis() ) NextUpdate += Period;
 }
 
+// Create NMEA2000 message
+void SendN2kPitch(double Yaw, double Pitch, double Roll) {   //sende Yaw, Pitch, Roll
+  static unsigned long SlowDataUpdated = InitNextUpdate(SlowDataUpdatePeriod, PGN1SendOffset);				
+  tN2kMsg N2kMsg;
 
+  if ( IsTimeToUpdate(SlowDataUpdated) ) {
+    SetNextUpdate(SlowDataUpdated, SlowDataUpdatePeriod);
+
+    Serial.printf("Gieren			: %3.1f °\n",Yaw);
+    Serial.printf("Krängung		: %3.1f °\n",Pitch);
+    Serial.printf("Rollen			: %3.1f °\n",Roll);
+
+    SetN2kPGN127257(N2kMsg, 0, Yaw, Pitch, Roll); 
+    NMEA2000.SendMsg(N2kMsg);
+  }
+}
+
+void SendN2kHeading(double Heading) {
+  static unsigned long SlowDataUpdated = InitNextUpdate(SlowDataUpdatePeriod, PGN2endOffset);
+  tN2kMsg N2kMsg;
+
+  if ( IsTimeToUpdate(SlowDataUpdated) ) {
+    SetNextUpdate(SlowDataUpdated, SlowDataUpdatePeriod);
+
+    Serial.printf("Heading    : %3.1f °\n", Heading);
+
+    SetN2kMagneticHeading(N2kMsg, 2, Heading, N2kDoubleNA, N2kDoubleNA);
+    NMEA2000.SendMsg(N2kMsg);
+  }
+}
 
 // The setup() function runs once each time the micro-controller starts
 void setup()
 {
   Serial.begin(115200);
 
-  Serial.printf("KielSensor setup %s start\n", VersionSoftware);
+  Serial.printf("BD Sensor setup %s start\n", VersionSoftware);
 
   //Filesystem prepare for Webfiles
   if (!LittleFS.begin(true)) {
@@ -86,13 +119,20 @@ void setup()
   Wire.begin(I2C_SDA, I2C_SCL);
   I2C_scan();
 
-  // Start TOF Sensor: 
-  ToF_begin(); //initialize the pmod
-  debug();     //display all registers
-  delay(1000); //wait one second (make the message readable)
-
-  // Calibrate TOF sensor
-  ToF_calibrate();
+  // Initialize TOF Sensor
+  bToF_Status = PmodToF::begin(bToF_CalibrationLoaded);
+  if (bToF_Status) {
+    Serial.println("Pmod ToF ISL29501 initialized in I2C single-shot mode");
+    bI2C_Status = 1;
+    flashLED(LED(Green)); // Flash LED to indicate successful ToF initialization
+    if (!bToF_CalibrationLoaded) {
+      Serial.println("Pmod ToF calibration not found in EEPROM; distances may be inaccurate");
+    }
+  } else {
+    Serial.println("Pmod ToF ISL29501 initialization failed");
+    bI2C_Status = 0;
+    flashLED(LED(Red)); // Flash LED to indicate failed ToF initialization
+  }
 
   //LED
   LEDInit();
@@ -149,9 +189,9 @@ void setup()
   for (i = 0; i < 6; i++) id += (chipid[i] << (7 * i));
 
   // Set product information
-  NMEA2000.SetProductInformation("KD01.2610", // Manufacturer's Model serial code
+  NMEA2000.SetProductInformation("BD01.2406", // Manufacturer's Model serial code
                                  100, // Manufacturer's product code
-                                 "KD Sensor Module",  // Manufacturer's Model ID
+                                 "BD Sensor Module",  // Manufacturer's Model ID
                                  VersionSoftware,  // Manufacturer's Software version code
                                  VersionHardware // Manufacturer's Model version
                                 );
@@ -203,8 +243,10 @@ void setup()
 
   ArduinoOTA.setHostname(HostName);
   ArduinoOTA.begin();
-}
 
+
+  LEDoff();
+}
 
 void loop()
 {
@@ -213,9 +255,9 @@ void loop()
   //bAP_on = WiFi.enableAP(bAP_on);
     
   // LED visu Wifi
-  LEDflash(LED(Green)); // Betrieb ok
+  flashLED(LED(Green)); // Betrieb ok
   if (bI2C_Status == 0){
-    //LEDflash(LED(Red)); // Sensorfehler
+    flashLED(LED(Red)); // Sensorfehler
     Serial.print("Sensorfehler\n");
   } 
 
@@ -227,32 +269,26 @@ void loop()
   Serial.printf("Soft-AP IP address = %s\n", WiFi.softAPIP().toString());
   sCL_Status = sWifiStatus(WiFi.status());
 
-  // Distance-Sensor
-  constexpr uint32_t INTERVAL_MS = 30000;
-  uint32_t lastRead = 0;
 
-  if (millis() - lastRead >= INTERVAL_MS) {
-    lastRead = millis();
-
-    float fdistanceMeters = ToF_getMeasurement();
-
-      Serial.print("Distanz: ");
-      Serial.print(fdistanceMeters, 3);
-      Serial.println(" m");
+  if (bToF_Status) {
+    if (PmodToF::readDistanceMeters(fSStellung)) {
+      Serial.printf("Kiel ausgefahren: %.3f m\n", fSStellung);
     } else {
-      Serial.println("I2C-Lesefehler");
+      Serial.println("Pmod ToF I2C read failed");
     }
-  
-  Serial.printf("Schwert: %f cm\n", fSStellung);
-  fAbsTief = fdistanceMeters + fKielOffset;
+  }
+
+  fAbsTief = fSStellung + fKielOffset;
   Serial.printf("Tiefgang: %f cm\n", fAbsTief);
 
   // Send Messages NMEA 0183
-  SendNMEA0183Message(sendXDR()); // Send NMEA0183 Message
+  SendNMEA0183Message(sendXDRKiel()); // Send NMEA0183 Message for Kiel
 
   delay(200);
 
   // Send Messages NMEA 2000
+
+
 
   delay(200);
 
@@ -273,9 +309,6 @@ void loop()
     Serial.read();
   }
 
-  // OLED
-  //	oledloop();
-
   // Website Data	
   freeHeapSpace();
   
@@ -284,5 +317,5 @@ void loop()
     delay(1000); // give time for reboot page to load
     ESP.restart();
   }
-}
 
+}
