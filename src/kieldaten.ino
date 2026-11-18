@@ -254,12 +254,8 @@ void loop()
   bConnect_CL = WiFi.status() == WL_CONNECTED ? 1 : 0;
   //bAP_on = WiFi.enableAP(bAP_on);
     
-  // LED visu Wifi
+  // LED loop running indicator
   flashLED(LED(Green), 5); // Betrieb ok
-  if (bI2C_Status == 0){
-    flashLED(LED(Red),5); // Sensorfehler
-    Serial.print("Sensorfehler\n");
-  } 
 
   // OTA	
   ArduinoOTA.handle();
@@ -279,6 +275,7 @@ void loop()
       flashLED(LED(Blue), 5);
     } else {
       Serial.println("Pmod ToF I2C read failed\n");
+      flashLED(LED(Red),5);
     }
     fAbsTief = fSStellung + fKielOffset;
     Serial.printf("Kiel ausgefahren: %f cm\n", fSStellung);
