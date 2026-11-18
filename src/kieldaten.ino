@@ -271,8 +271,9 @@ void loop()
 
 
   if (bToF_Status) {
-    if (PmodToF::readDistanceMeters(fSStellung)) {
-      Serial.printf("Kiel ausgefahren: %.3f m\n", fSStellung);
+    if (PmodToF::readDistanceMeters(fSStellung))
+    {fSStellung = fSStellung + 100.0; 
+    Serial.printf("Kiel ausgefahren: %.3f m\n", fSStellung);
     } else {
       Serial.println("Pmod ToF I2C read failed");
     }
